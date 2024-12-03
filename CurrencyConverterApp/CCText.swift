@@ -32,4 +32,9 @@ struct CCText {
         Text(text)
             .font(.subheadline)
     }
+    
+    static func caption(_ text: String) -> some View {
+        Text(text)
+            .font(.caption)
+    }
 }
