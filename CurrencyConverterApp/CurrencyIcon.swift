@@ -8,9 +8,8 @@ struct CurrencyIcon: View {
             Image(currencyImage)
                 .resizable()
                 .scaledToFit()
-            Text(currencyName)
+            CCText.caption(currencyName)
                 .padding(3)
-                .font(.caption)
                 .frame(maxWidth:.infinity)
                 .background(.brown.opacity(0.75))
         }

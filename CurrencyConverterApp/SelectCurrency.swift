@@ -13,10 +13,10 @@ struct SelectCurrency: View {
                 .ignoresSafeArea()
                 .background(.brown)
             VStack {
-                Text("Select the currency you are starting with:")
+                CCText.defaultText("Select the currency you are starting with:")
                     .fontWeight(/*@START_MENU_TOKEN@*/.bold/*@END_MENU_TOKEN@*/)
                 IconGrid(currency: $topCurrency)
-                Text("Select the currency you would like to convert to:")
+                CCText.defaultText("Select the currency you would like to convert to:")
                     .fontWeight(/*@START_MENU_TOKEN@*/.bold/*@END_MENU_TOKEN@*/)
                 IconGrid(currency: $bottomCurrency)
                 Button("Done") {

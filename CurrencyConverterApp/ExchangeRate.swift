@@ -11,7 +11,7 @@ struct ExchangeRate: View {
                 .resizable()
                 .scaledToFit()
                 .frame(height:33)
-            Text(text)
+            CCText.defaultText(text)
             Image(rightImage)
                 .resizable()
                 .scaledToFit()

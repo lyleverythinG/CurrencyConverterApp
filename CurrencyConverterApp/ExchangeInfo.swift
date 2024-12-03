@@ -17,13 +17,11 @@ struct ExchangeInfo: View {
             
             VStack {
                 // Exchange Rates Text
-                Text("Exchange Rates")
-                    .font(.largeTitle)
+                CCText.largeTitle("Exchange Rates")
                     .tracking(3)
                 
                 // Description
-                Text("Real-time Rates Info")
-                    .font(.title2)
+                CCText.title2("Real-time Rates Info")
                     .padding()
                 
                 if isLoading {
