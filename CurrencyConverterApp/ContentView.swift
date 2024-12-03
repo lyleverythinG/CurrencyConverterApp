@@ -49,7 +49,7 @@ struct ContentView: View {
                                 .scaledToFit()
                                 .frame(height: 33)
                             Text(leftCurrency.name)
-                                .font(.headline)
+                                .font(.subheadline)
                                 .foregroundStyle(.white)
                         }
                         .padding(.bottom, -5)
@@ -74,7 +74,7 @@ struct ContentView: View {
                         // Currency
                         HStack {
                             Text(rightCurrency.name)
-                                .font(.headline)
+                                .font(.subheadline)
                                 .foregroundStyle(.white)
                             Image(rightCurrency.image)
                                 .resizable()
