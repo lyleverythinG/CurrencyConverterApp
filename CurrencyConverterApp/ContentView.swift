@@ -7,18 +7,10 @@ extension View {
     }
 }
 
-
 struct ContentView: View {
-    @State var showExchangeInfo = false
-    @State var showSelectCurrency = false
-    @State var leftAmount = ""
-    @State var rightAmount = ""
     @FocusState var leftTyping
     @FocusState var rightTyping
-    @State var leftCurrency = Currency.usdCurrency
-    @State var rightCurrency = Currency.phpCurrency
-    @State var exchangeRate: Double = 1.0
-    @State var isLoading = false
+    @StateObject private var vm = CurrencyExchangeViewModel()
     
     var body: some View {
         ZStack {
@@ -35,14 +27,13 @@ struct ContentView: View {
                     .frame(height: 200)
                 
                 //Currency exchange text
-                Text("Currency Exchange")
-                    .font(.largeTitle)
+                CCText.largeTitle("Currency Exchange")
                     .foregroundStyle(.white)
                 
                 //Currency conversion section
                 HStack {
                     // Left conversion
-                    LeftConversionFieldView(currency:leftCurrency, amount: $leftAmount, isTyping: $leftTyping, showSelectCurrency: $showSelectCurrency)
+                    LeftConversionFieldView(currency:vm.leftCurrency, amount: $vm.leftAmount, isTyping: $leftTyping, showSelectCurrency: $vm.showSelectCurrency)
                     
                     //Equal sign
                     Image(systemName: "equal")
@@ -51,7 +42,7 @@ struct ContentView: View {
                         .symbolEffect(.pulse)
                     
                     //Right conversion
-                    RightConversionFieldView(currency: rightCurrency, amount: $rightAmount, isTyping: $rightTyping, showSelectCurrency: $showSelectCurrency)
+                    RightConversionFieldView(currency: vm.rightCurrency, amount: $vm.rightAmount, isTyping: $rightTyping, showSelectCurrency: $vm.showSelectCurrency)
                 }
                 .padding()
                 .background(.black.opacity(0.5))
@@ -59,7 +50,7 @@ struct ContentView: View {
                 Spacer()
                 
                 // Info Button
-                InfoButton(showExchangeInfo: $showExchangeInfo)
+                InfoButton(showExchangeInfo: $vm.showExchangeInfo)
             }
         }
         .onTapGesture {
@@ -68,77 +59,33 @@ struct ContentView: View {
         .task {
             try? Tips.configure()
         }
-        .onChange(of: leftAmount) {_, _ in
+        .onChange(of: vm.leftAmount) { _, _ in
             if leftTyping {
-                fetchExchangeRate(baseCurrency: leftCurrency.rawValue, targetCurrency: rightCurrency.rawValue) { rate in
-                    self.exchangeRate = rate
-                    rightAmount = leftCurrency.convert(leftAmount, to: rightCurrency, exchangeRate: rate)
-                }
+                vm.convertLeftAmount()
             }
         }
-        .onChange(of: rightAmount) {_, _ in
+        .onChange(of: vm.rightAmount) { _, _ in
             if rightTyping {
-                fetchExchangeRate(baseCurrency: rightCurrency.rawValue, targetCurrency: leftCurrency.rawValue) { rate in
-                    self.exchangeRate = rate
-                    leftAmount = rightCurrency.convert(rightAmount, to: leftCurrency, exchangeRate: rate)
-                }
+                vm.convertRightAmount()
             }
         }
-        .onChange(of: leftCurrency) {_, _ in
-            fetchExchangeRate(baseCurrency: leftCurrency.rawValue, targetCurrency: rightCurrency.rawValue) { rate in
-                self.exchangeRate = rate
-                leftAmount = rightCurrency.convert(rightAmount, to: leftCurrency, exchangeRate: rate)
-            }
+        .onChange(of: vm.leftCurrency) { _, _ in
+            vm.updateForLeftCurrencyChange()
         }
-        .onChange(of: rightCurrency) {_, _ in
-            fetchExchangeRate(baseCurrency: leftCurrency.rawValue, targetCurrency: rightCurrency.rawValue) { rate in
-                self.exchangeRate = rate
-                rightAmount = leftCurrency.convert(leftAmount, to: rightCurrency, exchangeRate: rate)
-            }
+        .onChange(of: vm.rightCurrency) { _, _ in
+            vm.updateForRightCurrencyChange()
         }
         .onAppear {
-            fetchExchangeRate(baseCurrency: leftCurrency.rawValue, targetCurrency: rightCurrency.rawValue, forceFetch: false) { rate in
-                self.exchangeRate = rate
-                rightAmount = leftCurrency.convert(leftAmount, to: rightCurrency, exchangeRate: rate)
+            vm.fetchExchangeRate(baseCurrency: vm.leftCurrency.rawValue, targetCurrency: vm.rightCurrency.rawValue, forceFetch: false) { rate in
+                //                self.exchangeRate = rate
+                vm.rightAmount = vm.leftCurrency.convert(vm.leftAmount, to: vm.rightCurrency, exchangeRate: rate)
             }
         }
-        .sheet(isPresented: $showExchangeInfo) {
+        .sheet(isPresented: $vm.showExchangeInfo) {
             ExchangeInfo()
         }
-        .sheet(isPresented: $showSelectCurrency) {
-            SelectCurrency(topCurrency: $leftCurrency, bottomCurrency: $rightCurrency)
-        }
-    }
-    
-    private func fetchExchangeRate(baseCurrency: String, targetCurrency: String, forceFetch: Bool = false, completion: @escaping (Double) -> Void) {
-        self.isLoading = true
-        
-        let cache = PersistentExchangeRateCache.shared
-        
-        // Check if we need to force fetching new data
-        if forceFetch || cache.getExchangeRate(baseCurrency: baseCurrency, targetCurrency: targetCurrency) == nil {
-            ExchangeRateService().fetchExchangeRates(baseCurrency: baseCurrency, targetCurrency: targetCurrency) { result in
-                DispatchQueue.main.async {
-                    self.isLoading = false
-                    switch result {
-                    case .success(let rate):
-                        print(String(format: "Fetched new rate: %.2f", rate))
-                        cache.setExchangeRate(baseCurrency: baseCurrency, targetCurrency: targetCurrency, rate: rate)
-                        completion(rate)
-                    case .failure(let error):
-                        print("Error fetching exchange rate: \(error)")
-                    }
-                }
-            }
-        } else {
-            // Use cached rate if available
-            if let cachedRate = cache.getExchangeRate(baseCurrency: baseCurrency, targetCurrency: targetCurrency) {
-                DispatchQueue.main.async {
-                    print(String(format: "Using cached rate: %.2f", cachedRate))
-                    self.isLoading = false
-                    completion(cachedRate)
-                }
-            }
+        .sheet(isPresented: $vm.showSelectCurrency) {
+            SelectCurrency(topCurrency: $vm.leftCurrency, bottomCurrency: $vm.rightCurrency)
         }
     }
     
@@ -156,8 +103,7 @@ struct ContentView: View {
                         .resizable()
                         .scaledToFit()
                         .frame(height: 33)
-                    Text(currency.name)
-                        .font(.subheadline)
+                    CCText.subHeadline(currency.name)
                         .foregroundStyle(.white)
                 }
                 .padding(.bottom, -5)
@@ -185,8 +131,7 @@ struct ContentView: View {
             VStack {
                 // Currency
                 HStack {
-                    Text(currency.name)
-                        .font(.subheadline)
+                    CCText.subHeadline(currency.name)
                         .foregroundStyle(.white)
                     Image(currency.image)
                         .resizable()
