@@ -6,18 +6,21 @@ struct ExchangeRate: View {
     let rightImage: ImageResource
     
     var body: some View {
-        HStack  { // 4x
-            Image(leftImage)
-                .resizable()
-                .scaledToFit()
-                .frame(height:33)
+        HStack  {
+            ExchangeRateImg(image: leftImage)
             CCText.defaultText(text)
-            Image(rightImage)
+            ExchangeRateImg(image: rightImage)
+        }
+    }
+    
+  private struct ExchangeRateImg: View {
+        let image: ImageResource
+        
+        var body: some View {
+            Image(image)
                 .resizable()
                 .scaledToFit()
                 .frame(height:33)
-            
         }
     }
 }
-
