@@ -4,8 +4,6 @@
 //
 //  Created by Lyle Dane Carcedo on 12/4/24.
 //
-
-import Foundation
 import SwiftUI
 
 struct CCText {

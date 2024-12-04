@@ -1,11 +1,26 @@
 
 import Foundation
 
-class PersistentExchangeRateCache {
-    static let shared = PersistentExchangeRateCache()
+class ExchangeRateCache {
+    static let shared = ExchangeRateCache()
     private let defaults = UserDefaults.standard
     
+    private let leftCurrencyKey = "leftCurrency"
+    private let rightCurrencyKey = "rightCurrency"
+    
     private init() {}
+    
+    enum CurrencyField {
+        case left
+        case right
+        
+        var key: String {
+            switch self {
+            case .left: return "leftCurrency"
+            case .right: return "rightCurrency"
+            }
+        }
+    }
     
     private func cacheKey(baseCurrency: String, targetCurrency: String) -> String {
         return "\(baseCurrency)-\(targetCurrency)"
@@ -37,6 +52,19 @@ class PersistentExchangeRateCache {
         defaults.set(Date().timeIntervalSince1970, forKey: timestampKey)
         
         print(String(format: "Save rate: %.2f for key \(key)", rate))
-
+    }
+    
+    func getCachedCurrency (for field: CurrencyField) -> Currency? {
+        guard let rawValue = defaults.string(forKey: field.key),
+              let currency = Currency(rawValue: rawValue) else {
+            print("Invalid or missing currency for key: \(field.key)")
+            return nil
+        }
+        return currency
+    }
+    
+    func setCachedCurrency(_ currency: Currency, field: CurrencyField) {
+        defaults.set(currency.rawValue, forKey: field.key)
+        print("Saved currency: \(currency.rawValue) for key: \(field.key)")
     }
 }

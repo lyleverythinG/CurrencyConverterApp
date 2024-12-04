@@ -14,11 +14,24 @@ class CurrencyExchangeViewModel: ObservableObject {
     @Published var showSelectCurrency = false
     @Published var leftAmount = ""
     @Published var rightAmount = ""
-    @Published var leftCurrency: Currency = .usdCurrency
-    @Published var rightCurrency: Currency = .phpCurrency
+    @Published var leftCurrency: Currency = .usdCurrency {
+        didSet {
+            ExchangeRateCache.shared.setCachedCurrency(leftCurrency, field: .left)
+        }
+    }
+    @Published var rightCurrency: Currency = .phpCurrency {
+        didSet {
+            ExchangeRateCache.shared.setCachedCurrency(rightCurrency, field: .right)
+        }
+    }
     
     private let exchangeRateService = ExchangeRateService()
-    private let cache = PersistentExchangeRateCache.shared
+    private let cache = ExchangeRateCache.shared
+    
+    init() {
+        self.leftCurrency = cache.getCachedCurrency(for: .left) ?? .usdCurrency
+        self.rightCurrency = cache.getCachedCurrency(for: .right) ?? .phpCurrency
+    }
     
     func fetchExchangeRate(
         baseCurrency: String,

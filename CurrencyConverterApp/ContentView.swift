@@ -21,7 +21,7 @@ struct ContentView: View {
             
             VStack {
                 // Currency Exchange image view
-                Image(.exchangerate)
+                Image(.exchangeRate)
                     .resizable()
                     .scaledToFit()
                     .frame(height: 200)
@@ -160,8 +160,6 @@ struct ContentView: View {
                 Spacer()
                 Button {
                     showExchangeInfo.toggle()
-                    print("showExchangeInfo value: \(showExchangeInfo)")
-                    
                 } label: {
                     Image(systemName: "info.circle.fill")
                         .font(.largeTitle)
