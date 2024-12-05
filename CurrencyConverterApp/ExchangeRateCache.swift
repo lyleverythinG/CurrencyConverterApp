@@ -10,18 +10,6 @@ class ExchangeRateCache {
     
     private init() {}
     
-    enum CurrencyField {
-        case left
-        case right
-        
-        var key: String {
-            switch self {
-            case .left: return "leftCurrency"
-            case .right: return "rightCurrency"
-            }
-        }
-    }
-    
     private func cacheKey(baseCurrency: String, targetCurrency: String) -> String {
         return "\(baseCurrency)-\(targetCurrency)"
     }
