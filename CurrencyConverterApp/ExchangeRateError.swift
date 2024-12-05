@@ -19,4 +19,23 @@ enum ExchangeRateError: Error {
     case noDataReceived
     case exchangeRateNotFound(String)
     case decodingError(String)
+    
+    var description: String {
+        switch self {
+        case .apiError(let message):
+            return "API Error: \(message)"
+        case .invalidURL:
+            return "Invalid URL: The URL provided was not valid."
+        case .invalidServerResponse:
+            return "Invalid Server Response: The server response was not as expected."
+        case .unexpectedError(let message):
+            return "Unexpected Error: \(message)"
+        case .noDataReceived:
+            return "No Data Received: No data was received from the server."
+        case .decodingError(let message):
+            return "Decoding Error: There was an error decoding the server response. \(message)"
+        case .exchangeRateNotFound(let currency):
+            return "Exchange Rate Not Found: Could not find an exchange rate for \(currency)."
+        }
+    }
 }
