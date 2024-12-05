@@ -7,23 +7,6 @@
 
 import Foundation
 
-enum ExchangeRateError: Error, LocalizedError {
-    case cacheMiss
-    case apiError(String)
-    case invalidResponse
-    
-    var errorDescription: String? {
-        switch self {
-        case .cacheMiss:
-            return "The exchange rate is not available in the cache and needs to be fetched."
-        case .apiError(let message):
-            return "Failed to fetch exchange rate from the server: \(message)"
-        case .invalidResponse:
-            return "The server returned an invalid response."
-        }
-    }
-}
-
 class CurrencyExchangeViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var exchangeRate: Double = 1.0
@@ -82,7 +65,7 @@ class CurrencyExchangeViewModel: ObservableObject {
                         completion(.success(rate))
                         
                     case .failure(let error):
-                        print("Error fetching exchange rate: \(error.localizedDescription)")
+                        print("Error fetching exchange rate: \(error.description)")
                         
                         if retryAttempts > 0 {
                             print("Retrying... Remaining attempts: \(retryAttempts - 1)")
@@ -95,8 +78,9 @@ class CurrencyExchangeViewModel: ObservableObject {
                                 self.exchangeRate = cachedRate
                                 completion(.success(cachedRate))
                             } else {
-                                completion(.failure(.apiError(error.localizedDescription)))
+                                completion(.failure(error))
                             }
+                            self.isLoading = false
                         }
                     }
                 }
@@ -113,7 +97,7 @@ class CurrencyExchangeViewModel: ObservableObject {
                 let convertedAmount = baseCurrency.convert(sourceAmount, to: targetCurrency, exchangeRate: rate)
                 updateTargetAmount(convertedAmount)
             case .failure(let error):
-                print("Error converting amount from \(baseCurrency.rawValue) to \(targetCurrency.rawValue): \(error.localizedDescription)")
+                print("Error converting amount from \(baseCurrency.rawValue) to \(targetCurrency.rawValue): \(error.description)")
             }
         }
     }
