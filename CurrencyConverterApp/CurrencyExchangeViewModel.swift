@@ -7,6 +7,23 @@
 
 import Foundation
 
+enum ExchangeRateError: Error, LocalizedError {
+    case cacheMiss
+    case apiError(String)
+    case invalidResponse
+    
+    var errorDescription: String? {
+        switch self {
+        case .cacheMiss:
+            return "The exchange rate is not available in the cache and needs to be fetched."
+        case .apiError(let message):
+            return "Failed to fetch exchange rate from the server: \(message)"
+        case .invalidResponse:
+            return "The server returned an invalid response."
+        }
+    }
+}
+
 class CurrencyExchangeViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var exchangeRate: Double = 1.0
@@ -37,56 +54,94 @@ class CurrencyExchangeViewModel: ObservableObject {
         baseCurrency: String,
         targetCurrency: String,
         forceFetch: Bool = false,
-        completion: @escaping (Double) -> Void
+        completion: @escaping (Result<Double, ExchangeRateError>) -> Void
     ) {
+        var retryAttempts = 1
         isLoading = true
         
-        if forceFetch || cache.getExchangeRate(baseCurrency: baseCurrency, targetCurrency: targetCurrency) == nil {
+        func attemptFetch() {
+            // Check the cache first
+            if !forceFetch, let cachedRate = cache.getExchangeRate(baseCurrency: baseCurrency, targetCurrency: targetCurrency) {
+                DispatchQueue.main.async {
+                    print(String(format: "Using cached rate for %@ -> %@: %.2f", baseCurrency, targetCurrency, cachedRate))
+                    self.isLoading = false
+                    completion(.success(cachedRate))
+                }
+                return
+            }
+            
+            // Attempt to fetch from API
             exchangeRateService.fetchExchangeRates(baseCurrency: baseCurrency, targetCurrency: targetCurrency) { result in
                 DispatchQueue.main.async {
-                    self.isLoading = false
                     switch result {
                     case .success(let rate):
-                        print(String(format: "Fetched new rate: %.2f", rate))
+                        print(String(format: "Fetched new rate for %@ -> %@: %.2f", baseCurrency, targetCurrency, rate))
                         self.cache.setExchangeRate(baseCurrency: baseCurrency, targetCurrency: targetCurrency, rate: rate)
                         self.exchangeRate = rate
-                        completion(rate)
+                        self.isLoading = false
+                        completion(.success(rate))
+                        
                     case .failure(let error):
-                        print("Error fetching exchange rate: \(error)")
+                        print("Error fetching exchange rate: \(error.localizedDescription)")
+                        
+                        if retryAttempts > 0 {
+                            print("Retrying... Remaining attempts: \(retryAttempts - 1)")
+                            retryAttempts -= 1
+                            attemptFetch()
+                        } else {
+                            // If all retries fail, fallback to cache or return an error
+                            if let cachedRate = self.cache.getExchangeRate(baseCurrency: baseCurrency, targetCurrency: targetCurrency) {
+                                print(String(format: "Fallback to cached rate for %@ -> %@: %.2f", baseCurrency, targetCurrency, cachedRate))
+                                self.exchangeRate = cachedRate
+                                completion(.success(cachedRate))
+                            } else {
+                                completion(.failure(.apiError(error.localizedDescription)))
+                            }
+                        }
                     }
                 }
             }
-        } else if let cachedRate = cache.getExchangeRate(baseCurrency: baseCurrency, targetCurrency: targetCurrency) {
-            DispatchQueue.main.async {
-                print(String(format: "Using cached rate: %.2f", cachedRate))
-                self.isLoading = false
-                self.exchangeRate = cachedRate
-                completion(cachedRate)
+        }
+        
+        attemptFetch()
+    }
+    
+    func convertAmount(baseCurrency: Currency,targetCurrency: Currency, sourceAmount: String, updateTargetAmount: @escaping (String) -> Void) {
+        fetchExchangeRate(baseCurrency: baseCurrency.rawValue, targetCurrency: targetCurrency.rawValue) { result in
+            switch result {
+            case .success(let rate):
+                let convertedAmount = baseCurrency.convert(sourceAmount, to: targetCurrency, exchangeRate: rate)
+                updateTargetAmount(convertedAmount)
+            case .failure(let error):
+                print("Error converting amount from \(baseCurrency.rawValue) to \(targetCurrency.rawValue): \(error.localizedDescription)")
             }
         }
     }
     
-    func convertLeftAmount() {
-        fetchExchangeRate(baseCurrency: leftCurrency.rawValue, targetCurrency: rightCurrency.rawValue) { rate in
-            self.rightAmount = self.leftCurrency.convert(self.leftAmount, to: self.rightCurrency, exchangeRate: rate)
+    func handleCurrencyChange(currencyField: CurrencyField) {
+        let baseCurrency: Currency
+        let targetCurrency: Currency
+        
+        switch currencyField {
+        case .left:
+            baseCurrency = leftCurrency
+            targetCurrency = rightCurrency
+        case .right:
+            baseCurrency = rightCurrency
+            targetCurrency = leftCurrency
         }
-    }
-    
-    func convertRightAmount() {
-        fetchExchangeRate(baseCurrency: rightCurrency.rawValue, targetCurrency: leftCurrency.rawValue) { rate in
-            self.leftAmount = self.rightCurrency.convert(self.rightAmount, to: self.leftCurrency, exchangeRate: rate)
-        }
-    }
-    
-    func updateForLeftCurrencyChange() {
-        fetchExchangeRate(baseCurrency: leftCurrency.rawValue, targetCurrency: rightCurrency.rawValue) { rate in
-            self.leftAmount = self.rightCurrency.convert(self.rightAmount, to: self.leftCurrency, exchangeRate: rate)
-        }
-    }
-    
-    func updateForRightCurrencyChange() {
-        fetchExchangeRate(baseCurrency: leftCurrency.rawValue, targetCurrency: rightCurrency.rawValue) { rate in
-            self.rightAmount = self.leftCurrency.convert(self.leftAmount, to: self.rightCurrency, exchangeRate: rate)
+        
+        fetchExchangeRate(baseCurrency: baseCurrency.rawValue, targetCurrency: targetCurrency.rawValue) { result in
+            switch result {
+            case .success(let rate):
+                if currencyField == .left {
+                    self.rightAmount = self.leftCurrency.convert(self.leftAmount, to: self.rightCurrency, exchangeRate: rate)
+                } else {
+                    self.leftAmount = self.rightCurrency.convert(self.rightAmount, to: self.leftCurrency, exchangeRate: rate)
+                }
+            case .failure(let error):
+                print("Error handling currency change for \(currencyField): \(error.localizedDescription)")
+            }
         }
     }
 }

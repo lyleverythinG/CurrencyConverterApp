@@ -14,24 +14,24 @@ class ExchangeInfoViewModel: ObservableObject {
     private let service = ExchangeRateService()
     
     private func generateExchangeRateModels(
-        usdToPhp: Double? = nil,
-        phpToHkd: Double? = nil,
-        hkdToPhp: Double? = nil
+        usdToPhp: Double,
+        phpToHkd: Double,
+        hkdToPhp: Double
     ) -> [ExchangeRateModel] {
         return [
             ExchangeRateModel(
                 leftImage: Currency.usdCurrency.image,
-                text: "1 US Dollar = \(usdToPhp ?? 0.0) PHP",
+                text: "1 US Dollar = \(usdToPhp.formattedCurrencyStringVal()) PHP",
                 rightImage: Currency.phpCurrency.image
             ),
             ExchangeRateModel(
                 leftImage: Currency.phpCurrency.image,
-                text: "1 Philippine Peso = \(phpToHkd ?? 0.0) HKD",
+                text: "1 Philippine Peso = \(phpToHkd.formattedCurrencyStringVal()) HKD",
                 rightImage: Currency.hkdCurrency.image
             ),
             ExchangeRateModel(
                 leftImage: Currency.hkdCurrency.image,
-                text: "1 HKD = \(hkdToPhp ?? 0.0) PHP",
+                text: "1 HKD = \(hkdToPhp.formattedCurrencyStringVal()) PHP",
                 rightImage: Currency.phpCurrency.image
             )
         ]
@@ -40,9 +40,9 @@ class ExchangeInfoViewModel: ObservableObject {
     func fetchExchangeRatesInfo() {
         let group = DispatchGroup()
         
-        var usdToPhpRate: Double?
-        var phpToHkdRate: Double?
-        var hkdToPhpRate: Double?
+        var usdToPhpRate: Double = 0.0
+        var phpToHkdRate: Double = 0.0
+        var hkdToPhpRate: Double = 0.0
         
         let exchangeConfigurations = [
             (Currency.usdCurrency.rawValue, Currency.phpCurrency.rawValue, { rate in usdToPhpRate = rate }),

@@ -1,12 +1,6 @@
 import SwiftUI
 import TipKit
 
-extension View {
-    func hideKeyboard() {
-        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-    }
-}
-
 struct ContentView: View {
     @FocusState var leftTyping
     @FocusState var rightTyping
@@ -26,22 +20,22 @@ struct ContentView: View {
                     .scaledToFit()
                     .frame(height: 200)
                 
-                //Currency exchange text
+                // Currency exchange text
                 CCText.largeTitle("Currency Exchange")
                     .foregroundStyle(.white)
                 
-                //Currency conversion section
+                // Currency conversion section
                 HStack {
                     // Left conversion
-                    LeftConversionFieldView(currency:vm.leftCurrency, amount: $vm.leftAmount, isTyping: $leftTyping, showSelectCurrency: $vm.showSelectCurrency)
+                    LeftConversionFieldView(currency: vm.leftCurrency, amount: $vm.leftAmount, isTyping: $leftTyping, showSelectCurrency: $vm.showSelectCurrency)
                     
-                    //Equal sign
+                    // Equal sign
                     Image(systemName: "equal")
                         .font(.largeTitle)
                         .foregroundStyle(.white)
                         .symbolEffect(.pulse)
                     
-                    //Right conversion
+                    // Right conversion
                     RightConversionFieldView(currency: vm.rightCurrency, amount: $vm.rightAmount, isTyping: $rightTyping, showSelectCurrency: $vm.showSelectCurrency)
                 }
                 .padding()
@@ -61,24 +55,41 @@ struct ContentView: View {
         }
         .onChange(of: vm.leftAmount) { _, _ in
             if leftTyping {
-                vm.convertLeftAmount()
+                vm.convertAmount(
+                    baseCurrency: vm.leftCurrency,
+                    targetCurrency: vm.rightCurrency,
+                    sourceAmount: vm.leftAmount
+                ) { convertedAmount in
+                    vm.rightAmount = convertedAmount
+                }
             }
+            
         }
         .onChange(of: vm.rightAmount) { _, _ in
             if rightTyping {
-                vm.convertRightAmount()
+                vm.convertAmount(
+                    baseCurrency: vm.rightCurrency,
+                    targetCurrency: vm.leftCurrency,
+                    sourceAmount: vm.rightAmount
+                ) { convertedAmount in
+                    vm.leftAmount = convertedAmount
+                }
             }
         }
         .onChange(of: vm.leftCurrency) { _, _ in
-            vm.updateForLeftCurrencyChange()
+            vm.handleCurrencyChange(currencyField: .left)
         }
         .onChange(of: vm.rightCurrency) { _, _ in
-            vm.updateForRightCurrencyChange()
+            vm.handleCurrencyChange(currencyField: .right)
         }
         .onAppear {
-            vm.fetchExchangeRate(baseCurrency: vm.leftCurrency.rawValue, targetCurrency: vm.rightCurrency.rawValue, forceFetch: false) { rate in
-                //                self.exchangeRate = rate
-                vm.rightAmount = vm.leftCurrency.convert(vm.leftAmount, to: vm.rightCurrency, exchangeRate: rate)
+            vm.fetchExchangeRate(baseCurrency: vm.leftCurrency.rawValue, targetCurrency: vm.rightCurrency.rawValue) { result in
+                switch result {
+                case .success(let rate):
+                    vm.rightAmount = vm.leftCurrency.convert(vm.leftAmount, to: vm.rightCurrency, exchangeRate: rate)
+                case .failure(let error):
+                    print("Error on initial fetch: \(error.localizedDescription)")
+                }
             }
         }
         .sheet(isPresented: $vm.showExchangeInfo) {
