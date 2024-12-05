@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Bucket
+   uuid = "1EF23BDB-8822-4B96-B403-4C5BD7C11664"
+   type = "1"
+   version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "A67F60E3-0BF5-4B5F-AF12-0BC6EB36106F"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "CurrencyConverterApp/ContentView.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "85"
+            endingLineNumber = "85"
+            landmarkName = "body"
+            landmarkType = "24">
+            <Locations>
+               <Location
+                  uuid = "A67F60E3-0BF5-4B5F-AF12-0BC6EB36106F - 15989dabd65070ea"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "CurrencyConverterApp.ContentView.body.getter : some"
+                  moduleName = "CurrencyConverterApp"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/lyledanecarcedo/Desktop/CurrencyConverterApp/CurrencyConverterApp/ContentView.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "81"
+                  endingLineNumber = "81"
+                  offsetFromSymbolStart = "2776">
+               </Location>
+               <Location
+                  uuid = "A67F60E3-0BF5-4B5F-AF12-0BC6EB36106F - e5e4e4c6a5681264"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #8 () -&gt; () in CurrencyConverterApp.ContentView.body.getter : some"
+                  moduleName = "CurrencyConverterApp"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/lyledanecarcedo/Desktop/CurrencyConverterApp/CurrencyConverterApp/ContentView.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "82"
+                  endingLineNumber = "82"
+                  offsetFromSymbolStart = "36">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
+</Bucket>
