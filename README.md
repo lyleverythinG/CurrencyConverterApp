@@ -8,6 +8,9 @@ _This simple currency converter app made with Swift is the first app I created i
 - Removed hard-coded currency values and fetched actual values from the API.
 - Added real currency options (PHP, USD, HK).
 - Added local storage to cache values and limit fetching to once per day (24-hour expiration).
+- Extracted sub views for readability and reusability.
+- Added Standardized text. (CCText)
+- Added View Models for separation of concerns.
 # SETUP
 - Add your own API key inside the ExchangeRateService file. Create your key here: Link: https://freecurrencyapi.com/
 # DEMO
