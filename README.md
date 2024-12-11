@@ -12,6 +12,6 @@ _This simple currency converter app made with Swift is the first app I created i
 - Added Standardized text. (CCText)
 - Added View Models for separation of concerns.
 # SETUP
-- Add your own API key inside the ExchangeRateService file. Create your key here: Link: https://freecurrencyapi.com/
+- Add your own API key inside the `ExchangeRateService` file. Create your key here: Link: https://freecurrencyapi.com/
 # DEMO
 https://github.com/user-attachments/assets/4670efe1-89db-4219-ab2a-1976745fb27e
