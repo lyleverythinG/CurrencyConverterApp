@@ -11,6 +11,7 @@ _This simple currency converter app made with Swift is the first app I created i
 - Extracted sub views for readability and reusability.
 - Added Standardized text. (CCText)
 - Added View Models for separation of concerns.
+- Added code improvements and code cleanup
 # SETUP
 - Add your own API key inside the `ExchangeRateService` file. Create your key here: Link: https://freecurrencyapi.com/
 # DEMO
