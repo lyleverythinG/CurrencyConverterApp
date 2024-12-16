@@ -15,7 +15,7 @@ struct ContentView: View {
             
             VStack {
                 // Currency Exchange image view
-                Image(.exchangeRate)
+                Image(.exchangerate)
                     .resizable()
                     .scaledToFit()
                     .frame(height: 200)
