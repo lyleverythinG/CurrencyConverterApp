@@ -15,4 +15,4 @@ _This simple currency converter app made with Swift is the first app I created i
 # SETUP
 - Add your own API key inside the `ExchangeRateService` file. Create your key here: Link: https://freecurrencyapi.com/
 # DEMO
-https://github.com/user-attachments/assets/4670efe1-89db-4219-ab2a-1976745fb27e
+https://github.com/user-attachments/assets/6fa21dc4-7b7a-4c86-aa6a-54ceb957bafd
