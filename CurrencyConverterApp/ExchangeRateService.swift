@@ -8,7 +8,7 @@
 import Foundation
 
 class ExchangeRateService {
-    private let apiKey = ""// TODO: Add your own API key.
+    private let apiKey = ""//TODO: Add your own API key.
     private let baseURL = "https://api.freecurrencyapi.com/v1/latest"
     private let urlSession: URLSession
     
