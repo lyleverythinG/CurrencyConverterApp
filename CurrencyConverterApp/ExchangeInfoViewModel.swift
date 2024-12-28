@@ -6,7 +6,7 @@
 //
 import SwiftUI
 
-class ExchangeInfoViewModel: ObservableObject {
+final class ExchangeInfoViewModel: ObservableObject {
     @Published var isLoading = true
     @Published var exchangeRates: [ExchangeRateModel] = []
     
