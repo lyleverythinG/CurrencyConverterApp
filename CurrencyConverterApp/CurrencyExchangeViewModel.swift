@@ -7,7 +7,7 @@
 
 import Foundation
 
-class CurrencyExchangeViewModel: ObservableObject {
+final class CurrencyExchangeViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var exchangeRate: Double = 1.0
     @Published var showExchangeInfo = false
